@@ -1,3 +1,4 @@
+import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,8 @@ class CompassViewModel() : ViewModel() {
     private val _words = MutableLiveData<Array<String>>()
     val words: LiveData<Array<String>> get() = _words
 
+    var offlineString: String = ""
+
     fun fetchData() {
         viewModelScope.launch {
             try {
@@ -24,9 +27,11 @@ class CompassViewModel() : ViewModel() {
                     response.body()?.let { body ->
                         _characters.value = getEveryTenthCharacter(body)
                         _words.value = countWords(body)
+                        offlineString = body
                     }
                 } else {
-                    // Handle error response
+                    _characters.value = getEveryTenthCharacter(offlineString)
+                    _words.value = countWords(offlineString)
                 }
             } catch (e: Exception) {
                 // Handle network or other errors
